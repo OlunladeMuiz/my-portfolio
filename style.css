@@ -457,8 +457,43 @@ section {
     transform: translateY(-5px);
 }
 
-/* Profile Image & Experience Badge */
-.hero-image {
+/* Tech item tooltip and focus styles */
+.tech-item {
+    position: relative;
+    display: inline-block;
+    margin: 0.25rem;
+}
+.tech-item img {
+    width: 44px;
+    height: 44px;
+    display: block;
+}
+.tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 20, 0.92);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease, transform 150ms ease;
+}
+.tech-item:hover .tooltip,
+.tech-item:focus .tooltip,
+.tech-item:focus-within .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px);
+}
+.tech-item:focus {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 4px;
+    border-radius: 6px;
+}
     position: relative;
 }
 
