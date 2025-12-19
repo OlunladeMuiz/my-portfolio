@@ -26,7 +26,12 @@
     --border-radius-sm: 4px;
     --border-radius-md: 8px;
     --border-radius-lg: 16px;
-}
+
+    /* Navigation (adaptable for light/dark) */
+    --nav-bg: rgba(77,93,235,0.06); /* subtle bluish glass for light mode */
+    --nav-border: rgba(0,0,0,0.06);
+    --nav-blur: 8px;
+} 
 
 /* Dark Theme Colors */
 [data-theme="dark"] {
@@ -36,7 +41,11 @@
     --text-secondary: #cccccc;
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
-}
+
+    /* navbar adapted for dark mode */
+    --nav-bg: rgba(10,18,40,0.78); /* deep navy glass */
+    --nav-border: rgba(255,255,255,0.04);
+} 
 
 /* Reset & Base Styles */
 * {
@@ -141,12 +150,13 @@ section {
     position: fixed;
     top: 0;
     width: 100%;
-    background: var(--bg-primary);
-    backdrop-filter: blur(10px);
+    background-color: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    backdrop-filter: blur(var(--nav-blur));
     z-index: 1000;
     padding: 1rem 0;
-    transition: var(--transition-fast);
-}
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+} 
 
 /* Menu Toggle (Hamburger) */
 .menu-toggle {
@@ -240,7 +250,7 @@ section {
 
 /* Additional modern layout tweaks */
 /* Make nav-wrapper translucent with blur effect for modern look */
-.nav-wrapper { background: linear-gradient(180deg, rgba(32, 30, 30, 0.6), rgba(104, 98, 98, 0.4)); backdrop-filter: blur(8px); }
+.nav-wrapper { background-color: var(--nav-bg); backdrop-filter: blur(var(--nav-blur)); border-bottom: 1px solid var(--nav-border); }
 .nav-wrapper.scrolled { box-shadow: 0 2px 14px rgba(0,0,0,0.12); }
 
 /* CTA tweaks */
