@@ -494,9 +494,6 @@ section {
     outline-offset: 4px;
     border-radius: 6px;
 }
-    position: relative;
-}
-
 .profile-image {
     width: 50%;    
     max-width: 400px;
