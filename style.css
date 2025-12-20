@@ -219,7 +219,7 @@ section {
 .sidebar-socials a:hover { color: var(--primary-color); }
 .sidebar-theme { background: transparent; border: 1px solid rgba(0,0,0,0.06); padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; }
 .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity var(--transition-fast); z-index: 1500; }
-.sidebar.open .sidebar-backdrop, .sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
+.sidebar-backdrop.open { opacity: 1; pointer-events: auto; }
 
 /* Responsive nav rules */
 @media (max-width: 1024px) {
