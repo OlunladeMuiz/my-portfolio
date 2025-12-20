@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Configure your API endpoint here.
     // For local testing pin the API URL explicitly to avoid detection issues.
     // Change this to your deployed API when ready.
-    let API_URL = 'http://localhost:3000/api/users'; // pinned for local testing (Step 2)
+    let API_URL = 'http://localhost:3001/api/users'; // pinned for local testing (Step 2)
 
     // Note: the detection probe remains available as window.__detectApiPromise if you need it. (disabled by explicit pin)
 
