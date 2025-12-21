@@ -1,5 +1,10 @@
-// Main script for example.html
-document.addEventListener('DOMContentLoaded', function () {
+// Main script for example.html - with performance optimizations
+// Defer non-critical animations and effects until after page load
+window.addEventListener('load', () => {
+    initializePageEffects();
+}, { once: true });
+
+function initializePageEffects() {
     // Initialize AOS if available
     if (typeof AOS !== 'undefined') {
         AOS.init({ duration: 700, once: true, offset: 100, easing: 'ease-out-cubic' });
@@ -487,4 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => notification.style.opacity = '1', 10);
         setTimeout(() => { notification.style.opacity = '0'; setTimeout(() => notification.remove(), 300); }, 3000);
     }
-});
+}
+
+// Initialize effects only after critical resources loaded
+initializePageEffects();

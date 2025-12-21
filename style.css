@@ -1,3 +1,13 @@
+/* Critical CSS: Fast initial render */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
 /* Modern Variables */
 :root {
     /* Colors */
@@ -45,9 +55,7 @@
     /* navbar adapted for dark mode */
     --nav-bg: rgba(10,18,40,0.78); /* deep navy glass */
     --nav-border: rgba(255,255,255,0.04);
-} 
-
-/* Reset & Base Styles */
+}
 * {
     margin: 0;
     padding: 0;
