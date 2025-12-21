@@ -1101,11 +1101,16 @@ section {
     color: var(--text-primary);
     transition: var(--transition-fast);
     outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-box-shadow: inset 0 0 0px 1000px var(--bg-primary);
+    box-shadow: inset 0 0 0px 1000px var(--bg-primary);
 }
 
 .form-group textarea {
     min-height: 150px;
     resize: vertical;
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-group label {
@@ -1174,6 +1179,10 @@ section {
     gap: 0.5rem;
     cursor: pointer;
     transition: var(--transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 48px;
+    touch-action: manipulation;
 }
 
 .submit-btn:hover {
@@ -1452,6 +1461,22 @@ section {
 
     .contact-form {
         padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px;
+        padding: 1rem;
+    }
+
+    .submit-btn {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-height: 50px;
     }
 
     .cta-buttons {

@@ -285,14 +285,19 @@ function initializePageEffects() {
                 try { await Promise.race([window.__detectApiPromise, new Promise(r => setTimeout(r, 2000))]); } catch(e) { /* ignore */ }
             }
             const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                subject: document.getElementById('subject').value,
-                message: document.getElementById('message').value
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                subject: document.getElementById('subject').value.trim(),
+                message: document.getElementById('message').value.trim()
             };
             console.log('Contact form submit', { apiUrl: API_URL, formData });
             const submitButton = contactForm.querySelector('button[type=submit]');
-            if (submitButton) { submitButton.disabled = true; submitButton.textContent = 'Sending...'; }
+            if (submitButton) { 
+                submitButton.disabled = true; 
+                submitButton.textContent = 'Sending...'; 
+                // Prevent accidental double-tap on mobile
+                submitButton.style.pointerEvents = 'none';
+            }
             try {
                 const resp = await fetch(API_URL, {
                     method: 'POST',
@@ -309,6 +314,10 @@ function initializePageEffects() {
                     showNotification(`Message sent successfully!${methodNote}`, 'success');
                     console.info('Contact form successfully submitted', data);
                     contactForm.reset();
+                    // Scroll to top on mobile to show success message
+                    if (window.innerWidth < 768) {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                 } else if (data && (data.error || data.errors)) {
                     // show server-provided error message when possible
                     const msg = data.error || (Array.isArray(data.errors) ? data.errors.map(x=>x.msg).join('; ') : JSON.stringify(data.errors));
@@ -449,7 +458,11 @@ function initializePageEffects() {
                 }
                 console.error('Contact form submit error', err);
             } finally {
-                if (submitButton) { submitButton.disabled = false; submitButton.textContent = 'Send Message'; }
+                if (submitButton) { 
+                    submitButton.disabled = false; 
+                    submitButton.textContent = 'Send Message';
+                    submitButton.style.pointerEvents = 'auto';
+                }
             }
         });
     }
