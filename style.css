@@ -1070,6 +1070,11 @@ section {
     text-align: center;
 }
 
+.contact-card p {
+    color: white;
+    text-decoration: none;
+}
+
 .contact-card i {
     font-size: 2rem;
     color: var(--primary-color);
@@ -1450,6 +1455,15 @@ section {
         padding: 6rem 1rem 3rem;
     }
 
+    .hero-content {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-image {
+        width: 70%;
+        max-width: 500px;
+    }
+
     .achievement-cards {
         grid-template-columns: 1fr;
     }
@@ -1461,6 +1475,15 @@ section {
 
     .contact-form {
         padding: 1.5rem;
+    }
+
+    .contact-card {
+        padding: 2rem;
+    }
+
+    .contact-card p {
+        color: white;
+        text-decoration: none;
     }
 
     .form-group {
