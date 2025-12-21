@@ -1253,7 +1253,7 @@ section {
 }
 
 .secondary-btn:hover .btn-content {
-    color: white;
+    color: rgb(18, 18, 123);
 }
 
 .secondary-btn .btn-content {
