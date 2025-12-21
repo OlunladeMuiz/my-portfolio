@@ -244,32 +244,59 @@ function initializePageEffects() {
     // Configure your API endpoint here.
     // For local testing pin the API URL explicitly to avoid detection issues.
     // Change this to your deployed API when ready.
-    let API_URL = 'http://localhost:3001/api/users'; // pinned for local testing (Step 2)
+    // Smart API URL detection: works on both local development and mobile
+    function getApiUrl() {
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        
+        // If accessing from localhost/127.0.0.1, use localhost API
+        if (['localhost', '127.0.0.1', '::1'].includes(hostname)) {
+            return 'http://localhost:3001/api/users';
+        }
+        
+        // If accessing from a different IP (mobile on same network), use that IP with port 3001
+        if (hostname && hostname !== 'localhost') {
+            return `http://${hostname}:3001/api/users`;
+        }
+        
+        // Fallback
+        return 'http://localhost:3001/api/users';
+    }
+    
+    let API_URL = getApiUrl();
+    console.info(`[API] Configured API URL: ${API_URL}`);
 
     // Note: the detection probe remains available as window.__detectApiPromise if you need it. (disabled by explicit pin)
 
     // Probe helper: try a list of ports and resolve the first one that responds to /api/_debug/echo
     window.__detectApiPromise = (async function detectApi() {
         const ports = [3000, 3001];
+        const hostname = window.location.hostname;
+        const hosts = ['localhost', hostname].filter(h => h && h !== 'localhost' || h === 'localhost');
+        
         const controllerTimeout = (ms) => {
             const c = new AbortController();
             const t = setTimeout(() => c.abort(), ms);
             return { signal: c.signal, clear: () => clearTimeout(t) };
         };
-        for (const p of ports) {
-            try {
-                const { signal, clear } = controllerTimeout(800);
-                const res = await fetch(`http://localhost:${p}/api/_debug/echo`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal
-                });
-                clear();
-                if (res && res.ok) {
-                    API_URL = `http://localhost:${p}/api/users`;
-                    console.info(`[API DETECT] Using local API on port ${p}`);
-                    return API_URL;
+        
+        for (const host of hosts) {
+            for (const p of ports) {
+                try {
+                    const { signal, clear } = controllerTimeout(800);
+                    const url = `http://${host}:${p}/api/_debug/echo`;
+                    const res = await fetch(url, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal
+                    });
+                    clear();
+                    if (res && res.ok) {
+                        API_URL = `http://${host}:${p}/api/users`;
+                        console.info(`[API DETECT] Using API on ${host}:${p}`);
+                        return API_URL;
+                    }
+                } catch (err) {
+                    // ignore and try next
                 }
-            } catch (err) {
-                // ignore and try next
             }
         }
         // If none responded, warn but keep current API_URL
@@ -299,12 +326,21 @@ function initializePageEffects() {
                 submitButton.style.pointerEvents = 'none';
             }
             try {
-                const resp = await fetch(API_URL, {
+                // Fetch with timeout handling
+                const fetchWithTimeout = (url, options = {}, timeoutMs = 8000) => {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+                    
+                    return fetch(url, { ...options, signal: controller.signal })
+                        .finally(() => clearTimeout(timeoutId));
+                };
+                
+                const resp = await fetchWithTimeout(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     mode: 'cors',
                     body: JSON.stringify(formData)
-                });
+                }, 8000);
                 console.log('Fetch response status', resp.status, 'apiUrl', API_URL);
                 // Try to parse JSON but fallback gracefully to text for better error messages
                 let data = null;
@@ -451,10 +487,23 @@ function initializePageEffects() {
             } catch (err) {
                 // Provide a helpful message when network is unreachable
                 const serverMessage = err && err.message;
-                if (serverMessage && serverMessage !== 'Failed to fetch') {
+                const isMobile = window.innerWidth < 768;
+                const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                const apiHost = new URL(API_URL).hostname;
+                
+                console.error('Contact form network error:', { message: serverMessage, apiUrl: API_URL, hostname: window.location.hostname, isMobile });
+                
+                if (serverMessage && serverMessage.includes('AbortError')) {
+                    showNotification('Request timed out. The API server may be offline. Please check your connection.', 'error');
+                } else if (serverMessage && serverMessage !== 'Failed to fetch') {
                     showNotification(`Network error: ${serverMessage}`, 'error');
+                } else if (isMobile && !isLocalhost) {
+                    // Mobile accessing from non-localhost - provide specific guidance
+                    showNotification(`Cannot reach API at ${apiHost}:3001. Make sure you're on the same network as the development server, or deploy the API to a public URL.`, 'error');
+                } else if (isLocalhost) {
+                    showNotification('Could not reach the contact API. Please ensure the dev API is running: PORT=3001 npm start', 'error');
                 } else {
-                    showNotification('Could not reach the contact API. Please ensure the dev API is running on port 3000 or 3001.', 'error');
+                    showNotification('Network connection failed. Please check your internet and try again.', 'error');
                 }
                 console.error('Contact form submit error', err);
             } finally {
