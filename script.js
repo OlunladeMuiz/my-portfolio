@@ -449,8 +449,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // CV Download - allow default behavior for local PDF files
-    // The HTML download attribute handles the download properly on all devices
+    // CV Download - force download using fetch + blob
+    const cvButton = document.querySelector('a[download*="Olunlade"]');
+    if (cvButton) {
+        cvButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/resources/Olunlade%20Abdulmuiz_full%20stack%20developer.pdf');
+                if (!response.ok) throw new Error('Failed to download CV');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'Olunlade_Abdulmuiz_Full_Stack_Developer.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading CV:', error);
+                // Fallback to direct link if fetch fails
+                window.location.href = '/resources/Olunlade%20Abdulmuiz_full%20stack%20developer.pdf';
+            }
+        });
+    }
 
     // Notification helper
     function showNotification(message, type) {
