@@ -488,22 +488,45 @@ function initializePageEffects() {
                 // Provide a helpful message when network is unreachable
                 const serverMessage = err && err.message;
                 const isMobile = window.innerWidth < 768;
-                const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+                const currentOrigin = window.location.origin;
                 const apiHost = new URL(API_URL).hostname;
+                const apiOrigin = new URL(API_URL).origin;
                 
-                console.error('Contact form network error:', { message: serverMessage, apiUrl: API_URL, hostname: window.location.hostname, isMobile });
+                console.error('Contact form network error:', {
+                    message: serverMessage,
+                    apiUrl: API_URL,
+                    apiOrigin,
+                    currentOrigin,
+                    hostname: window.location.hostname,
+                    isMobile,
+                    isLocalhost
+                });
                 
+                // Specific handling for CORS and network errors
                 if (serverMessage && serverMessage.includes('AbortError')) {
-                    showNotification('Request timed out. The API server may be offline. Please check your connection.', 'error');
+                    showNotification('Request timed out. The API server may be offline or unreachable. Verify the API is running on port 3001.', 'error');
+                } else if (serverMessage && serverMessage.includes('Failed to fetch')) {
+                    // Generic "Failed to fetch" - could be CORS, network, or API offline
+                    if (isMobile && !isLocalhost) {
+                        // On mobile accessing via IP
+                        const myIP = window.location.hostname;
+                        showNotification(
+                            `Cannot reach API. Checking:\n` +
+                            `• Is API running? (npm start on port 3001)\n` +
+                            `• Is API running on same network? (check ${myIP}:3001)\n` +
+                            `• Mobile and PC on same WiFi?`,
+                            'error'
+                        );
+                    } else if (isLocalhost) {
+                        showNotification('Failed to reach API at localhost:3001. Start it with: PORT=3001 npm start', 'error');
+                    } else {
+                        showNotification(`Cannot reach API at ${apiHost}. Network or CORS issue. Check browser console.`, 'error');
+                    }
                 } else if (serverMessage && serverMessage !== 'Failed to fetch') {
                     showNotification(`Network error: ${serverMessage}`, 'error');
-                } else if (isMobile && !isLocalhost) {
-                    // Mobile accessing from non-localhost - provide specific guidance
-                    showNotification(`Cannot reach API at ${apiHost}:3001. Make sure you're on the same network as the development server, or deploy the API to a public URL.`, 'error');
-                } else if (isLocalhost) {
-                    showNotification('Could not reach the contact API. Please ensure the dev API is running: PORT=3001 npm start', 'error');
                 } else {
-                    showNotification('Network connection failed. Please check your internet and try again.', 'error');
+                    showNotification('Network connection failed. Please try again.', 'error');
                 }
                 console.error('Contact form submit error', err);
             } finally {

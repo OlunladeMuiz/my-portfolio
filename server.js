@@ -188,11 +188,49 @@ if (!ALLOWED_ORIGIN && process.env.NODE_ENV === 'production') {
 }
 
 // Flexible CORS: allow configured origin or, for dev, allow non-browser origins (curl, file://)
+// Also allow same-host origins (e.g., mobile on same network accessing via IP:port)
 function isOriginAllowed(origin) {
     if (!origin || origin === 'null') return true; // file:// or non-browser
     if (ALLOWED_ORIGIN === '*') return true;
     if (ALLOWED_ORIGIN === origin) return true;
-    if (process.env.NODE_ENV !== 'production' && origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) return true;
+    
+    // In development, allow localhost, 127.0.0.1, and same-host origins (e.g., 192.168.x.x:5000 → port 3001)
+    if (process.env.NODE_ENV !== 'production' && origin) {
+        // Parse origin to get hostname
+        try {
+            const originUrl = new URL(origin);
+            const originHost = originUrl.hostname;
+            const originPort = originUrl.port || (originUrl.protocol === 'https:' ? '443' : '80');
+            
+            // Allow localhost/127.0.0.1
+            if (originHost === 'localhost' || originHost === '127.0.0.1' || originHost === '::1') {
+                return true;
+            }
+            
+            // Allow same-host origins (mobile on network accessing API at different port)
+            // e.g., request from http://192.168.1.100:5000 can call http://192.168.1.100:3001/api/users
+            if (originHost && !originHost.includes('.')) {
+                // Looks like a local network address or hostname, allow it in dev
+                return true;
+            }
+            
+            // Allow private network IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+            const privateRangePatterns = [
+                /^10\./,
+                /^172\.(1[6-9]|2\d|3[01])\./,
+                /^192\.168\./,
+                /^127\./,
+                /^::1$/,
+                /^fe80:/
+            ];
+            if (privateRangePatterns.some(pattern => pattern.test(originHost))) {
+                return true;
+            }
+        } catch (e) {
+            // If URL parsing fails, allow it in dev to be permissive
+            return true;
+        }
+    }
     return false;
 }
 
@@ -200,19 +238,24 @@ function isOriginAllowed(origin) {
 app.use((req, res, next) => {
     try {
         const origin = req.get('origin');
-        log('debug', 'Incoming request origin=', origin, 'method=', req.method, 'path=', req.path);
-        if (!origin) return next();
+        log('debug', `[CORS] Incoming ${req.method} ${req.path} from origin=${origin}`);
+        if (!origin) return next(); // No origin header, probably non-browser request
+        
         const allowed = isOriginAllowed(origin);
-        log('debug', 'Origin allowed?', allowed, 'origin=', origin);
+        log('debug', `[CORS] Origin allowed=${allowed} for origin="${origin}"`);
+        
         if (!allowed) {
-            log('warn', 'CORS blocked origin', origin);
+            log('warn', `[CORS] BLOCKED origin="${origin}" for ${req.method} ${req.path}`);
             // For preflight requests, return a JSON error so tests and clients can see the reason
-            if (req.method === 'OPTIONS') return res.status(403).json({ ok: false, error: 'Origin not allowed' });
-            return res.status(403).json({ ok: false, error: 'Origin not allowed' });
+            if (req.method === 'OPTIONS') return res.status(403).json({ ok: false, error: 'Origin not allowed', origin });
+            return res.status(403).json({ ok: false, error: 'Origin not allowed', origin });
         }
         next();
     } catch (err) {
         log('error', 'Error in CORS check middleware', err && err.stack ? err.stack : err);
+        next();
+    }
+});
         return res.status(500).json({ ok: false, error: 'Server error', detail: err && err.message });
     }
 });
