@@ -449,32 +449,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // CV Download (safe selector)
-    const cvBtn = document.querySelector('.secondary-btn');
-    if (cvBtn) {
-        cvBtn.addEventListener('click', async function (e) {
-            if (!this.href) return; // default navigation
-            // If it's a Google Drive link, try to fetch
-            if (this.href.includes('drive.google.com')) {
-                e.preventDefault();
-                try {
-                    const fileId = '1HK3VHJJyg1T5GFYN4NjKqn4s84SypyKP';
-                    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-                    const response = await fetch(downloadUrl);
-                    const blob = await response.blob();
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(blob);
-                    downloadLink.download = 'Onah_Stephen_CV.pdf';
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    downloadLink.remove();
-                    showNotification('CV downloaded successfully!', 'success');
-                } catch (error) {
-                    showNotification('Download failed. Please try again.', 'error');
-                }
-            }
-        });
-    }
+    // CV Download - allow default behavior for local PDF files
+    // The HTML download attribute handles the download properly on all devices
 
     // Notification helper
     function showNotification(message, type) {
