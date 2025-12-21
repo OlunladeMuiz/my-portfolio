@@ -298,6 +298,28 @@ npm run test:fallback
 - Graceful shutdown handlers (SIGINT/SIGTERM)
 - Comprehensive error logging with timestamps
 
+### 11. **PDF Download on Mobile (Dec 21, 2025)**
+**Challenge:** CV download button was downloading index.html source code on mobile instead of the PDF file from resources folder.
+
+**Solution:**
+- Updated CV button href to point to correct resource path: `/resources/Olunlade%20Abdulmuiz_full%20stack%20developer.pdf`
+- Implemented JavaScript fetch + blob approach for guaranteed downloads across all devices
+- Added fallback to direct link if fetch fails
+- Properly set download attribute with target filename
+- Tested and working on both mobile and desktop
+
+### 12. **Site Load Performance (Dec 21, 2025)**
+**Challenge:** Portfolio needed to open and load faster when the link is opened.
+
+**Solution:**
+- Added DNS prefetching for external domains (Google Fonts, CDN)
+- Implemented resource preconnection to critical hosts
+- Changed Font Awesome to async load via print media trick
+- Deferred AOS animations until page fully loads
+- Optimized critical CSS for faster first paint
+- Deferred all scripts with `defer` attribute for non-blocking loads
+- Eliminated render-blocking resources
+
 ---
 
 ## 📈 Performance Metrics
@@ -311,6 +333,14 @@ Optimizations implemented:
 - **Efficient CSS**: Single stylesheet (1497 lines) with variable system
 - **Debounced Scroll Events**: Navbar scroll effect and intersection observers
 - **Responsive Images**: Decorative SVG loads only when visible
+
+### Recent Performance Updates (Dec 21, 2025)
+- ✅ **DNS Prefetching** - Pre-resolves external domains (Google Fonts, CDN)
+- ✅ **Resource Preconnection** - Early connections to critical hosts
+- ✅ **Async Font Loading** - Font Awesome loads asynchronously, doesn't block rendering
+- ✅ **Deferred Animations** - AOS animations initialize only after page fully loads
+- ✅ **Critical CSS** - Base styles optimized for faster first paint
+- ✅ **Script Deferral** - Both AOS and script.js load after DOM is ready
 
 ---
 
@@ -403,6 +433,10 @@ CREATE POLICY "service_role_full_access" ON submissions
 ## 📝 Git Commits (Recent)
 
 ```
+f540491 - perf: optimize site load time with resource hints, async font loading, deferred scripts
+96c3de4 - fix: force PDF download using fetch + blob for all devices
+2d803d1 - fix: update CV download link to point to resources folder
+8e75308 - chore: update CV filename and fix styles
 6945c60 - fix: correct footer copyright name capitalization
 45a9d05 - fix: change Twitter links to Instagram  
 a6887bd - fix(mobile-nav): move sidebar backdrop outside sidebar to allow link interaction
@@ -449,6 +483,6 @@ Technologies used in this project:
 
 ---
 
-**Last Updated**: December 20, 2025
+**Last Updated**: December 21, 2025
 
 Made with ❤️ by Olunlade Muiz
