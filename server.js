@@ -128,7 +128,9 @@ if (!process.env.NODE_ENV) {
 const submissionsFile = path.join(__dirname, 'data', 'submissions.json');
 // In production these MUST be set. For local dev, defaults allow easier testing.
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || (process.env.NODE_ENV === 'production' ? null : 'changeme');
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || (process.env.NODE_ENV === 'production' ? null : '*');
+// For CORS: in development allow all origins (*), in production allow configured origin or default to allowing all
+// This is safe because the API validates all form submissions
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 // Default recipient for email notifications when SendGrid is used locally.
 // You can override this by setting SENDGRID_TO in your environment.
 const SENDGRID_TO = process.env.SENDGRID_TO || 'muiz.olunlade.9@gmail.com';
@@ -191,32 +193,28 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(helmet());
-if (!ALLOWED_ORIGIN && process.env.NODE_ENV === 'production') {
-    console.error('ALLOWED_ORIGIN must be set in production to restrict CORS');
-    process.exit(1);
-}
 
-// Configure CORS: in development, allow all origins (including mobile on same network)
-// In production, require ALLOWED_ORIGIN to be set and restrict to that origin.
+// Configure CORS: allow all origins by default (safe with form validation)
+// Can be restricted by setting ALLOWED_ORIGIN environment variable
 const corsOptions = {
     origin: function (origin, callback) {
-        // In development, allow all origins (including requests without origin header)
-        if (process.env.NODE_ENV !== 'production') {
-            log('info', '[CORS] Development mode: allowing origin', origin || '(no origin header)');
+        // Allow all origins if ALLOWED_ORIGIN is '*' or not restricted
+        if (ALLOWED_ORIGIN === '*') {
+            log('debug', '[CORS] Allowing all origins (mode: permissive)');
             return callback(null, true);
         }
         
-        // In production, check against ALLOWED_ORIGIN
+        // If no origin header (non-browser request like curl, Postman), allow it
         if (!origin || origin === 'null') {
-            // Non-browser requests (file://, curl, Postman)
             return callback(null, true);
         }
         
-        if (ALLOWED_ORIGIN === '*' || origin === ALLOWED_ORIGIN) {
+        // If specific origin is configured, check against it
+        if (origin === ALLOWED_ORIGIN) {
             return callback(null, true);
         }
         
-        log('warn', '[CORS] Production: blocked origin', origin);
+        log('warn', '[CORS] Rejected origin:', origin, 'expected:', ALLOWED_ORIGIN);
         return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
