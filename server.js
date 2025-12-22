@@ -118,11 +118,17 @@ async function sendEmailWithRetry({ to, from, subject, text, html, maxAttempts =
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure NODE_ENV defaults to development for local testing
+if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = 'development';
+    log('info', 'NODE_ENV not set, defaulting to development mode');
+}
+
 // Basic config
 const submissionsFile = path.join(__dirname, 'data', 'submissions.json');
 // In production these MUST be set. For local dev, defaults allow easier testing.
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || (process.env.NODE_ENV === 'production' ? null : 'changeme');
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || (process.env.NODE_ENV === 'production' ? null : 'http://localhost:3000');
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || (process.env.NODE_ENV === 'production' ? null : '*');
 // Default recipient for email notifications when SendGrid is used locally.
 // You can override this by setting SENDGRID_TO in your environment.
 const SENDGRID_TO = process.env.SENDGRID_TO || 'muiz.olunlade.9@gmail.com';
@@ -138,8 +144,11 @@ try {
 // Minimal structured logger
 function log(level, ...msgs) {
     const ts = new Date().toISOString();
-    // Keep it simple and synchronous for now
-    console.log(ts, level, ...msgs);
+    // Only log info, warn, error, and debug (not debug by default but can enable)
+    const shouldLog = ['info', 'warn', 'error', 'debug'].includes(level);
+    if (shouldLog) {
+        console.log(ts, level, ...msgs);
+    }
 }
 
 const fsPromises = fs.promises;
@@ -187,106 +196,37 @@ if (!ALLOWED_ORIGIN && process.env.NODE_ENV === 'production') {
     process.exit(1);
 }
 
-// Flexible CORS: allow configured origin or, for dev, allow non-browser origins (curl, file://)
-// Also allow same-host origins (e.g., mobile on same network accessing via IP:port)
-function isOriginAllowed(origin) {
-    if (!origin || origin === 'null') return true; // file:// or non-browser
-    if (ALLOWED_ORIGIN === '*') return true;
-    if (ALLOWED_ORIGIN === origin) return true;
-    
-    // In development, allow localhost, 127.0.0.1, and same-host origins (e.g., 192.168.x.x:5000 → port 3001)
-    if (process.env.NODE_ENV !== 'production' && origin) {
-        // Parse origin to get hostname
-        try {
-            const originUrl = new URL(origin);
-            const originHost = originUrl.hostname;
-            const originPort = originUrl.port || (originUrl.protocol === 'https:' ? '443' : '80');
-            
-            // Allow localhost/127.0.0.1
-            if (originHost === 'localhost' || originHost === '127.0.0.1' || originHost === '::1') {
-                return true;
-            }
-            
-            // Allow same-host origins (mobile on network accessing API at different port)
-            // e.g., request from http://192.168.1.100:5000 can call http://192.168.1.100:3001/api/users
-            if (originHost && !originHost.includes('.')) {
-                // Looks like a local network address or hostname, allow it in dev
-                return true;
-            }
-            
-            // Allow private network IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-            const privateRangePatterns = [
-                /^10\./,
-                /^172\.(1[6-9]|2\d|3[01])\./,
-                /^192\.168\./,
-                /^127\./,
-                /^::1$/,
-                /^fe80:/
-            ];
-            if (privateRangePatterns.some(pattern => pattern.test(originHost))) {
-                return true;
-            }
-        } catch (e) {
-            // If URL parsing fails, allow it in dev to be permissive
-            return true;
-        }
-    }
-    return false;
-}
-
-// Middleware to return a clear JSON error when origin is blocked
-app.use((req, res, next) => {
-    try {
-        const origin = req.get('origin');
-        log('debug', `[CORS] Incoming ${req.method} ${req.path} from origin=${origin}`);
-        if (!origin) return next(); // No origin header, probably non-browser request
-        
-        const allowed = isOriginAllowed(origin);
-        log('debug', `[CORS] Origin allowed=${allowed} for origin="${origin}"`);
-        
-        if (!allowed) {
-            log('warn', `[CORS] BLOCKED origin="${origin}" for ${req.method} ${req.path}`);
-            // For preflight requests, return a JSON error so tests and clients can see the reason
-            if (req.method === 'OPTIONS') return res.status(403).json({ ok: false, error: 'Origin not allowed', origin });
-            return res.status(403).json({ ok: false, error: 'Origin not allowed', origin });
-        }
-        next();
-    } catch (err) {
-        log('error', 'Error in CORS check middleware', err && err.stack ? err.stack : err);
-        next();
-    }
-});
-        return res.status(500).json({ ok: false, error: 'Server error', detail: err && err.message });
-    }
-});
-
+// Configure CORS: in development, allow all origins (including mobile on same network)
+// In production, require ALLOWED_ORIGIN to be set and restrict to that origin.
 const corsOptions = {
-    origin: (origin, callback) => {
-        log('debug', '[CORS] origin callback, origin=', origin, 'allowed=', ALLOWED_ORIGIN, 'env=', process.env.NODE_ENV);
-        // Avoid throwing an error from the CORS package; return boolean instead so our middleware can handle rejection with a JSON 403
-        return callback(null, isOriginAllowed(origin));
+    origin: function (origin, callback) {
+        // In development, allow all origins (including requests without origin header)
+        if (process.env.NODE_ENV !== 'production') {
+            log('info', '[CORS] Development mode: allowing origin', origin || '(no origin header)');
+            return callback(null, true);
+        }
+        
+        // In production, check against ALLOWED_ORIGIN
+        if (!origin || origin === 'null') {
+            // Non-browser requests (file://, curl, Postman)
+            return callback(null, true);
+        }
+        
+        if (ALLOWED_ORIGIN === '*' || origin === ALLOWED_ORIGIN) {
+            return callback(null, true);
+        }
+        
+        log('warn', '[CORS] Production: blocked origin', origin);
+        return callback(new Error('Not allowed by CORS'));
     },
-    optionsSuccessStatus: 204,
-    methods: ['GET','POST','OPTIONS'],
-    allowedHeaders: ['Content-Type','X-Requested-With','x-admin-token']
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'X-Requested-With', 'x-admin-token']
 };
 
-// Preflight handler MUST run before the global CORS middleware so blocked origins get a clear JSON 403
-app.options('/api/*', (req, res, next) => {
-    try {
-        const origin = req.get('origin');
-        log('debug', 'Preflight check headers=', req.headers);
-        log('debug', 'Preflight check origin=', origin, 'path=', req.path);
-        if (origin && !isOriginAllowed(origin)) {
-            log('warn', 'Preflight blocked origin', origin);
-            return res.status(403).json({ ok: false, error: 'Origin not allowed' });
-        }
-        return cors(corsOptions)(req, res, next);
-    } catch (err) {
-        log('error', 'Error in preflight handler', err && err.stack ? err.stack : err);
-        return res.status(500).json({ ok: false, error: 'Server error', detail: err && err.message });
-    }
-});
+// Preflight handler MUST run before the global CORS middleware
+app.options('/api/*', cors(corsOptions));
 
 app.use(cors(corsOptions));
 
