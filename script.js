@@ -27,6 +27,12 @@ function initializePageEffects() {
         themeToggle.forEach(el => el.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>');
     }
 
+    function toggleTheme() {
+        const current = root.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+    }
+
     function setTheme(theme) {
         root.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
@@ -39,11 +45,18 @@ function initializePageEffects() {
     setTheme(defaultTheme);
 
     if (themeToggle && themeToggle.length > 0) {
-        themeToggle.forEach(el => el.addEventListener('click', () => {
-            const current = root.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            setTheme(next);
-        }));
+        themeToggle.forEach(el => {
+            // Click event
+            el.addEventListener('click', toggleTheme);
+            
+            // Keyboard events (Enter and Space)
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+            });
+        });
     }
 
     // Sidebar (off-canvas) behavior
