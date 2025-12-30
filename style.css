@@ -22,6 +22,7 @@ body {
     --warning-color: #ffc107;
     --error-color: #dc3545;
     
+    
     /* Animations */
     --transition-fast: 0.3s ease;
     --transition-medium: 0.5s ease;
@@ -106,7 +107,7 @@ section {
 .social-bar {
     position: fixed;
     left: 2rem;
-    top: 50%;
+    top: 48%;
     transform: translateY(-50%);
     z-index: 100;
     display: flex;
@@ -250,7 +251,10 @@ section {
 }
 
 /* Focus states */
-.menu-toggle:focus { outline: 2px solid rgba(77,93,235,0.2); border-radius: 6px; }
+.menu-toggle:focus {
+     outline: 2px solid rgba(77,93,235,0.2);
+      border-radius: 6px; 
+}
 .sidebar a:focus, .nav-center a:focus { outline: 2px dashed rgba(77,93,235,0.15);}
 
 /* Smooth icon color transition */
@@ -772,7 +776,7 @@ section {
 
 .timeline-dot {
     position: absolute;
-    left: -6px;
+    left: -0px;
     top: 16px;
     width: 36px;
     height: 36px;
@@ -787,7 +791,9 @@ section {
     transform: translateX(0);
     transition: transform 300ms ease;
 }
-
+.timeline-date a {
+    color: hsl(242, 72%, 61%);
+}
 .timeline-dot i { font-size: 1rem; transform-origin: center; }
 
 .timeline-item:hover .timeline-dot { transform: translateX(-4px) scale(1.03); }
