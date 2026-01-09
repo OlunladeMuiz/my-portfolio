@@ -406,7 +406,7 @@ section {
 
 .hero-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 4rem;
     align-items: center;
 }
@@ -909,6 +909,10 @@ section {
 .filter-btn:hover {
     background: var(--primary-color);
     color: white;
+}
+
+.project-card.hidden {
+    display: none !important;
 }
 
 .projects-grid {

@@ -162,16 +162,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Project Filtering
     const filterButtons = document.querySelectorAll('.filter-btn');
     const projectCards = document.querySelectorAll('.project-card');
-    if (filterButtons) {
+    if (filterButtons && filterButtons.length > 0) {
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 const filter = button.getAttribute('data-filter');
                 projectCards.forEach(card => {
-                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
-                        card.style.display = 'block';
+                    const shouldShow = filter === 'all' || card.getAttribute('data-category') === filter;
+                    if (shouldShow) {
+                        card.classList.remove('hidden');
+                        card.style.display = '';
                     } else {
+                        card.classList.add('hidden');
                         card.style.display = 'none';
                     }
                 });

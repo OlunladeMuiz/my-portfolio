@@ -26,8 +26,58 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <style>
+    /* Minimal dark theme support */
+    body.dark-theme {
+        background: #181a1b;
+        color: #e0e0e0;
+    }
+    body.dark-theme .nav-wrapper,
+    body.dark-theme .sidebar,
+    body.dark-theme .footer,
+    body.dark-theme .projects,
+    body.dark-theme .about,
+    body.dark-theme .skills,
+    body.dark-theme .experience,
+    body.dark-theme .contact {
+        background: #23272f;
+        color: #e0e0e0;
+    }
+    body.dark-theme .primary-btn,
+    body.dark-theme .secondary-btn {
+        background: #4d5deb;
+        color: #fff;
+    }
+    .skip-link {
+        position: absolute;
+        left: -999px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        z-index: 1000;
+        background: #4d5deb;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 4px;
+    }
+    .skip-link:focus {
+        left: 16px;
+        top: 16px;
+        width: auto;
+        height: auto;
+        outline: 2px solid #fff;
+    }
+    .skill-level-bar {
+        height: 6px;
+        background: #4d5deb;
+        border-radius: 3px;
+        margin-top: 4px;
+    }
+    </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Floating Social Bar -->
     <div class="social-bar">
         <a href="https://github.com/OlunladeMuiz" target="_blank" class="social-icon">
@@ -53,7 +103,6 @@
         <div class="nav-content">
             <div class="logo">
                 <a href="#home">OM</a>
-                <div class="tooltip"></div>
             </div>
             <button class="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
                 <span class="hamburger">
@@ -63,7 +112,7 @@
                 </span>
             </button>
             <ul class="nav-center">
-                <li><a href="#about">About</a></li>
+                <li><a href="#about" aria-current="page">About</a></li>
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#skills">Skills</a></li>
                 <li><a href="#projects">Projects</a></li>
@@ -74,7 +123,7 @@
             </ul>
             <ul class="nav-right">
               <li>
-                <a href=" https://mail.google.com/mail/?view=cm&fs=1&to=muiz.olunlade.9@gmail.com" class="primary-btn">Let's Talk</a>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=muiz.olunlade.9@gmail.com" class="primary-btn">Let's Talk</a>
               </li>
             </ul>
         </div>
@@ -116,15 +165,16 @@
         <div class="hero-content">
             <div class="hero-text" data-aos="fade-right">
                 <h1 class="glitch" data-text="Hi, I'm Olunlade Abdulmuiz">Hi, I'm Olunlade Muiz</h1>
-                <div class="typing-wrapper">
-                    <span class="static-text">I'm a&nbsp;</span>
-                    <ul class="dynamic-texts">
-                        <li><span>Junior Full Stack Developer</span></li>
-                        <li><span>React Developer</span></li>
-                        <li><span>Node.js Engineer</span></li>
-                        <li><span>TypeScript Enthusiast</span></li>
-                    </ul>
+                <div class="typing-wrapper" aria-live="polite">
+                  <span class="static-text">I'm a&nbsp;</span>
+                  <ul class="dynamic-texts">
+                    <li>Junior Full Stack Developer</li>
+                    <li>React Developer</li>
+                    <li>Node.js Engineer</li>
+                    <li>TypeScript Enthusiast</li>
+                  </ul>
                 </div>
+
                 <p class="hero-description">
                     Junior Full‑Stack Developer building reliable web apps with React, Node.js, and PostgreSQL.  
                     I ship maintainable code, prioritize accessibility, and love learning new tools to drive product impact.
@@ -185,7 +235,8 @@
                 </div>
             </div>
             <div class="hero-image" data-aos="fade-left">
-                    <img src="resources/Gemini_Generated_Image_dqmy8ldqmy8ldqmy.png" alt="Olunlade Muiz" class="profile-image" loading="lazy" decoding="async">
+                    <img src="resources/Gemini_Generated_Image_dqmy8ldqmy8ldqmy.png" alt="Portrait of Olunlade Muiz" class="profile-image" loading="lazy" decoding="async"
+                    onerror="this.onerror=null;this.src='https://via.placeholder.com/200x200?text=No+Image';">
                 <div class="experience-badge">
                     <span class="years">2</span>
                     <span class="text">Years of Experience</span>
@@ -371,22 +422,22 @@
                         <div class="skill-item">
                             <i class="fab fa-html5"></i>
                             <span>HTML5</span>
-                            <div class="skill-level" style="width: 90%"></div>
+                            <div class="skill-level-bar" style="width:90%"></div>
                         </div>
                         <div class="skill-item">
                             <i class="fab fa-css3-alt"></i>
                             <span>CSS3</span>
-                            <div class="skill-level" style="width: 85%"></div>
+                            <div class="skill-level-bar" style="width:85%"></div>
                         </div>
                         <div class="skill-item">
                             <i class="fab fa-js"></i>
                             <span>JavaScript</span>
-                            <div class="skill-level" style="width: 95%"></div>
+                            <div class="skill-level-bar" style="width:95%"></div>
                         </div>
                         <div class="skill-item">
                             <i class="fab fa-react"></i>
                             <span>React / Next.js</span>
-                            <div class="skill-level" style="width: 95%"></div>
+                            <div class="skill-level-bar" style="width:95%"></div>
                         </div>
                     </div>
                 </div>
@@ -477,7 +528,8 @@
                 <div class="project-card" data-category="fullstack" data-aos="fade-up">
                     <div class="project-card-inner">
                         <div class="project-image">
-                            <img src="resources/dry%20clean%20img.png" alt="Dry Cleaning Vendor App" loading="lazy" decoding="async">
+                            <img src="resources/dry%20clean%20img.png" alt="Screenshot of Dry Cleaning Vendor App" loading="lazy" decoding="async"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=No+Image';">
                             <div class="project-overlay">
                                 <div class="project-details">
                                     <h3>Dry Cleaning Vendor App</h3>
@@ -507,7 +559,8 @@
                 <div class="project-card" data-category="fullstack" data-aos="fade-up">
                     <div class="project-card-inner">
                         <div class="project-image">
-                            <img src="resources/centralised%20student%20portal%20img.png" alt="Student Resource Portal" loading="lazy" decoding="async">
+                            <img src="resources/centralised%20student%20portal%20img.png" alt="Screenshot of Student Resource Portal" loading="lazy" decoding="async"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=No+Image';">
                             <div class="project-overlay">
                                 <div class="project-details">
                                     <h3>Centralized Student Resource Portal</h3>
@@ -537,7 +590,8 @@
                 <div class="project-card" data-category="frontend" data-aos="fade-up">
                     <div class="project-card-inner">
                         <div class="project-image">
-                            <img src="resources/proffessional%20web%20img.png" alt="Professional Art Website Design" loading="lazy" decoding="async">
+                            <img src="resources/proffessional%20web%20img.png" alt="Screenshot of Professional Art Website Design" loading="lazy" decoding="async"
+                            onerror="this.onerror=null;this.src='https://via.placeholder.com/400x300?text=No+Image';">
                             <div class="project-overlay">
                                 <div class="project-details">
                                     <h3>Professional Art Website Design</h3>
@@ -614,6 +668,7 @@
                         <label for="message">Message</label>
                         <span class="focus-border"></span>
                     </div>
+                    <div id="contact-feedback" style="display:none;color:green;margin-top:10px;">Thank you for reaching out! (Form submission is disabled in this demo.)</div>
                     <button type="submit" class="submit-btn">
                         Send Message <i class="fas fa-paper-plane"></i>
                     </button>
@@ -657,5 +712,92 @@
     <!-- Scripts with optimal loading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
     <script src="script.js" defer></script>
+    <script>
+    // Project filter logic
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Project Filter ---
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('.project-card');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-filter');
+                projectCards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    card.style.display = (filter === 'all' || category === filter) ? '' : 'none';
+                });
+            });
+        });
+
+        // --- Sidebar Toggle ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebarClose = document.querySelector('.sidebar-close');
+        function openSidebar() {
+            sidebar.setAttribute('aria-hidden', 'false');
+            sidebar.classList.add('open');
+            sidebarBackdrop.classList.add('active');
+            menuToggle.setAttribute('aria-expanded', 'true');
+        }
+        function closeSidebar() {
+            sidebar.setAttribute('aria-hidden', 'true');
+            sidebar.classList.remove('open');
+            sidebarBackdrop.classList.remove('active');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+        menuToggle && menuToggle.addEventListener('click', openSidebar);
+        sidebarClose && sidebarClose.addEventListener('click', closeSidebar);
+        sidebarBackdrop && sidebarBackdrop.addEventListener('click', closeSidebar);
+
+        // --- Theme Toggle ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+        document.querySelectorAll('.theme-toggle').forEach(btn => {
+            btn.addEventListener('click', toggleTheme);
+            btn.addEventListener('keypress', e => {
+                if (e.key === 'Enter' || e.key === ' ') toggleTheme();
+            });
+        });
+
+        // --- Typing Animation ---
+        const dynamicTexts = document.querySelectorAll('.dynamic-texts li');
+        let typingIndex = 0;
+        function showTyping() {
+            dynamicTexts.forEach((el, i) => el.style.display = i === typingIndex ? 'inline' : 'none');
+            typingIndex = (typingIndex + 1) % dynamicTexts.length;
+        }
+        if (dynamicTexts.length > 0) {
+            showTyping();
+            setInterval(showTyping, 2000);
+        }
+
+        // --- Scroll to Top ---
+        const scrollBtn = document.getElementById('scroll-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) scrollBtn.style.display = 'block';
+            else scrollBtn.style.display = 'none';
+        });
+        scrollBtn && scrollBtn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+
+        // --- Contact Form Prevent Default ---
+        const contactForm = document.getElementById('contact-form');
+        contactForm && contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const feedback = document.getElementById('contact-feedback');
+            if (feedback) {
+                feedback.style.display = 'block';
+                setTimeout(() => { feedback.style.display = 'none'; }, 4000);
+            } else {
+                alert('Thank you for reaching out! (Form submission is disabled in this demo.)');
+            }
+        });
+
+        // --- AOS Init ---
+        if (window.AOS) AOS.init({ once: true });
+    });
+    </script>
 </body>
 </html>
