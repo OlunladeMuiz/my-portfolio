@@ -26,55 +26,6 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
-    <style>
-    /* Minimal dark theme support */
-    body.dark-theme {
-        background: #181a1b;
-        color: #e0e0e0;
-    }
-    body.dark-theme .nav-wrapper,
-    body.dark-theme .sidebar,
-    body.dark-theme .footer,
-    body.dark-theme .projects,
-    body.dark-theme .about,
-    body.dark-theme .skills,
-    body.dark-theme .experience,
-    body.dark-theme .contact {
-        background: #23272f;
-        color: #e0e0e0;
-    }
-    body.dark-theme .primary-btn,
-    body.dark-theme .secondary-btn {
-        background: #4d5deb;
-        color: #fff;
-    }
-    .skip-link {
-        position: absolute;
-        left: -999px;
-        top: auto;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        z-index: 1000;
-        background: #4d5deb;
-        color: #fff;
-        padding: 8px 16px;
-        border-radius: 4px;
-    }
-    .skip-link:focus {
-        left: 16px;
-        top: 16px;
-        width: auto;
-        height: auto;
-        outline: 2px solid #fff;
-    }
-    .skill-level-bar {
-        height: 6px;
-        background: #4d5deb;
-        border-radius: 3px;
-        margin-top: 4px;
-    }
-    </style>
 </head>
 <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -130,7 +81,7 @@
     </nav>
 
     <!-- Off-canvas Sidebar for mobile/medium screens -->
-    <aside id="sidebar" class="sidebar" aria-hidden="true" role="dialog" aria-label="Main Menu">
+    <aside id="sidebar" class="sidebar" aria-hidden="true" aria-modal="true" role="dialog" aria-label="Main Menu">
         <div class="sidebar-inner">
             <div class="sidebar-header">
                 <a class="sidebar-logo" href="#home">OM</a>
@@ -158,7 +109,7 @@
             </div>
         </div>
     </aside>
-    <div class="sidebar-backdrop" tabindex="-1"></div>
+    <div class="sidebar-backdrop" tabindex="-1" hidden aria-hidden="true"></div>
 
     <!-- Hero Section -->
     <section id="home" class="hero">
@@ -712,92 +663,5 @@
     <!-- Scripts with optimal loading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
     <script src="script.js" defer></script>
-    <script>
-    // Project filter logic
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- Project Filter ---
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const projectCards = document.querySelectorAll('.project-card');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const filter = this.getAttribute('data-filter');
-                projectCards.forEach(card => {
-                    const category = card.getAttribute('data-category');
-                    card.style.display = (filter === 'all' || category === filter) ? '' : 'none';
-                });
-            });
-        });
-
-        // --- Sidebar Toggle ---
-        const sidebar = document.getElementById('sidebar');
-        const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebarClose = document.querySelector('.sidebar-close');
-        function openSidebar() {
-            sidebar.setAttribute('aria-hidden', 'false');
-            sidebar.classList.add('open');
-            sidebarBackdrop.classList.add('active');
-            menuToggle.setAttribute('aria-expanded', 'true');
-        }
-        function closeSidebar() {
-            sidebar.setAttribute('aria-hidden', 'true');
-            sidebar.classList.remove('open');
-            sidebarBackdrop.classList.remove('active');
-            menuToggle.setAttribute('aria-expanded', 'false');
-        }
-        menuToggle && menuToggle.addEventListener('click', openSidebar);
-        sidebarClose && sidebarClose.addEventListener('click', closeSidebar);
-        sidebarBackdrop && sidebarBackdrop.addEventListener('click', closeSidebar);
-
-        // --- Theme Toggle ---
-        function toggleTheme() {
-            document.body.classList.toggle('dark-theme');
-        }
-        document.querySelectorAll('.theme-toggle').forEach(btn => {
-            btn.addEventListener('click', toggleTheme);
-            btn.addEventListener('keypress', e => {
-                if (e.key === 'Enter' || e.key === ' ') toggleTheme();
-            });
-        });
-
-        // --- Typing Animation ---
-        const dynamicTexts = document.querySelectorAll('.dynamic-texts li');
-        let typingIndex = 0;
-        function showTyping() {
-            dynamicTexts.forEach((el, i) => el.style.display = i === typingIndex ? 'inline' : 'none');
-            typingIndex = (typingIndex + 1) % dynamicTexts.length;
-        }
-        if (dynamicTexts.length > 0) {
-            showTyping();
-            setInterval(showTyping, 2000);
-        }
-
-        // --- Scroll to Top ---
-        const scrollBtn = document.getElementById('scroll-top');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) scrollBtn.style.display = 'block';
-            else scrollBtn.style.display = 'none';
-        });
-        scrollBtn && scrollBtn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
-
-        // --- Contact Form Prevent Default ---
-        const contactForm = document.getElementById('contact-form');
-        contactForm && contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const feedback = document.getElementById('contact-feedback');
-            if (feedback) {
-                feedback.style.display = 'block';
-                setTimeout(() => { feedback.style.display = 'none'; }, 4000);
-            } else {
-                alert('Thank you for reaching out! (Form submission is disabled in this demo.)');
-            }
-        });
-
-        // --- AOS Init ---
-        if (window.AOS) AOS.init({ once: true });
-    });
-    </script>
 </body>
 </html>

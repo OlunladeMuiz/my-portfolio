@@ -1,10 +1,14 @@
-// Main script for example.html - with performance optimizations
-// Defer non-critical animations and effects until after page load
-window.addEventListener('load', () => {
+// Main script for example.html
+// Attach UI interactions as soon as DOM is ready (don't wait for full page load).
+document.addEventListener('DOMContentLoaded', () => {
     initializePageEffects();
 }, { once: true });
 
 function initializePageEffects() {
+    // Sidebar must be initialized early and independently so it still works
+    // even if non-critical features (theme/localStorage, animations) fail.
+    setupSidebar();
+
     // Initialize AOS if available
     if (typeof AOS !== 'undefined') {
         AOS.init({ duration: 700, once: true, offset: 100, easing: 'ease-out-cubic' });
@@ -18,134 +22,148 @@ function initializePageEffects() {
         });
     }
 
-    //Theme toggle
-document.addEventListener('DOMContentLoaded', () => {
+    //Theme toggle (non-critical)
+    try {
+        const themeToggles = document.querySelectorAll('.theme-toggle');
+        const root = document.documentElement;
 
-    const themeToggles = document.querySelectorAll('.theme-toggle');
-    const root = document.documentElement;
+        const safeStorage = {
+            get(key) {
+                try { return localStorage.getItem(key); } catch { return null; }
+            },
+            set(key, value) {
+                try { localStorage.setItem(key, value); } catch { /* ignore */ }
+            }
+        };
 
-    function updateIcon(theme) {
-        themeToggles.forEach(el => {
-            el.innerHTML =
-                theme === 'dark'
-                    ? '<i class="fas fa-sun"></i>'
-                    : '<i class="fas fa-moon"></i>';
+        function updateIcon(theme) {
+            themeToggles.forEach(el => {
+                el.innerHTML =
+                    theme === 'dark'
+                        ? '<i class="fas fa-sun"></i>'
+                        : '<i class="fas fa-moon"></i>';
+            });
+        }
+
+        function setTheme(theme) {
+            root.setAttribute('data-theme', theme);
+            safeStorage.set('theme', theme);
+            updateIcon(theme);
+        }
+
+        function toggleTheme() {
+            const current = root.getAttribute('data-theme') || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        // Load theme (saved > system > light)
+        const savedTheme = safeStorage.get('theme');
+        const systemDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
+        setTheme(savedTheme || (systemDark ? 'dark' : 'light'));
+
+        themeToggles.forEach(btn => {
+            btn.addEventListener('click', toggleTheme);
         });
+    } catch {
+        // Ignore theme errors; sidebar should still work.
     }
 
-    function setTheme(theme) {
-        root.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        updateIcon(theme);
-    }
+    function setupSidebar() {
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.querySelector('.sidebar-close');
+        const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+        const sidebarLinks = sidebar ? sidebar.querySelectorAll('a[href^="#"]') : [];
 
-    function toggleTheme() {
-        const current = root.getAttribute('data-theme') || 'light';
-        setTheme(current === 'dark' ? 'light' : 'dark');
-    }
+        if (!menuToggle || !sidebar) return;
 
-    // Load theme (saved > system > light)
-    const savedTheme = localStorage.getItem('theme');
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setTheme(savedTheme || (systemDark ? 'dark' : 'light'));
+        const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        let lastFocusedElement = null;
 
-    themeToggles.forEach(btn => {
-        btn.addEventListener('click', toggleTheme);
-    });
+        function openSidebar() {
+            lastFocusedElement = document.activeElement;
 
-     //sidebar
-    const menuToggle = document.querySelector('.menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarClose = document.querySelector('.sidebar-close');
-    const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
-    const sidebarLinks = sidebar ? sidebar.querySelectorAll('a[href^="#"]') : [];
+            sidebar.classList.add('open');
+            document.body.classList.add('sidebar-open');
+            sidebarBackdrop?.removeAttribute('hidden');
+            sidebarBackdrop?.setAttribute('aria-hidden', 'false');
+            sidebarBackdrop?.classList.add('open');
+            sidebar.setAttribute('aria-hidden', 'false');
 
-    function openSidebar() {
-        if (!sidebar || !sidebarBackdrop) return;
-
-        sidebar.classList.add('open');
-        sidebarBackdrop.classList.add('open');
-        sidebar.setAttribute('aria-hidden', 'false');
-
-        if (menuToggle) {
             menuToggle.setAttribute('aria-expanded', 'true');
             menuToggle.classList.add('open');
+
+            const first = sidebar.querySelector(focusableSelector);
+            first?.focus();
         }
 
-        const firstLink = sidebar.querySelector('a');
-        if (firstLink) firstLink.focus();
-    }
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-open');
+            sidebarBackdrop?.classList.remove('open');
+            sidebarBackdrop?.setAttribute('hidden', '');
+            sidebarBackdrop?.setAttribute('aria-hidden', 'true');
+            sidebar.setAttribute('aria-hidden', 'true');
 
-    function closeSidebar() {
-        if (!sidebar || !sidebarBackdrop) return;
-
-        sidebar.classList.remove('open');
-        sidebarBackdrop.classList.remove('open');
-        sidebar.setAttribute('aria-hidden', 'true');
-
-        if (menuToggle) {
             menuToggle.setAttribute('aria-expanded', 'false');
             menuToggle.classList.remove('open');
-            menuToggle.focus();
-        }
-    }
 
-    // Open / close toggle
-    if (menuToggle) {
+            (lastFocusedElement && typeof lastFocusedElement.focus === 'function')
+                ? lastFocusedElement.focus()
+                : menuToggle.focus();
+        }
+
+        // Toggle
         menuToggle.addEventListener('click', () => {
             sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
         });
-    }
 
-    // Close button
-    if (sidebarClose) {
-        sidebarClose.addEventListener('click', closeSidebar);
-    }
+        // Close interactions
+        sidebarClose?.addEventListener('click', closeSidebar);
+        sidebarBackdrop?.addEventListener('click', closeSidebar);
+        sidebarLinks.forEach(link => link.addEventListener('click', closeSidebar));
 
-    // Backdrop click
-    if (sidebarBackdrop) {
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-    }
+        // ESC + focus trap
+        document.addEventListener('keydown', (e) => {
+            if (!sidebar.classList.contains('open')) return;
 
-    // Close on nav click (mobile UX)
-    sidebarLinks.forEach(link => {
-        link.addEventListener('click', closeSidebar);
-    });
+            if (e.key === 'Escape') {
+                closeSidebar();
+                return;
+            }
 
-    // ESC key support
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sidebar?.classList.contains('open')) {
-            closeSidebar();
+            if (e.key === 'Tab') {
+                const focusables = Array.from(sidebar.querySelectorAll(focusableSelector));
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        });
+
+        // Close only when crossing into the desktop breakpoint.
+        // (Mobile browsers can fire resize during scroll/address-bar collapse.)
+        const desktopMQ = window.matchMedia ? window.matchMedia('(min-width: 1025px)') : null;
+        const onDesktopChange = () => {
+            if (desktopMQ?.matches && sidebar.classList.contains('open')) closeSidebar();
+        };
+        if (desktopMQ) {
+            desktopMQ.addEventListener?.('change', onDesktopChange);
+            // fallback for older browsers
+            desktopMQ.addListener?.(onDesktopChange);
+        } else {
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 1024 && sidebar.classList.contains('open')) closeSidebar();
+            });
         }
-    });
-
-});
-
-
-    // Auto-close sidebar on resize when switching to large screens
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 1024 && sidebar && sidebar.classList.contains('open')) {
-            closeSidebar();
-        }
-    });
-
-    if (sidebarClose) {
-        sidebarClose.addEventListener('click', closeSidebar);
     }
-
-    if (sidebarBackdrop) {
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-    }
-
-    // close sidebar when link clicked
-    sidebarLinks.forEach(link => link.addEventListener('click', closeSidebar));
-
-    // close on ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
-            closeSidebar();
-        }
-    });
 
     // Navbar Scroll Effect
     const navbar = document.querySelector('.nav-wrapper');
@@ -265,6 +283,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Highlight navigation links based on scroll position
     const navLinks = document.querySelectorAll('.nav-center a, .sidebar-nav a');
     const sections = Array.from(navLinks).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+    // Simple rotating text (used by .dynamic-texts list in hero)
+    const dynamicTexts = document.querySelectorAll('.dynamic-texts li');
+    if (dynamicTexts && dynamicTexts.length > 0) {
+        let typingIndex = 0;
+        const showTyping = () => {
+            dynamicTexts.forEach((el, i) => {
+                el.style.display = i === typingIndex ? 'inline' : 'none';
+            });
+            typingIndex = (typingIndex + 1) % dynamicTexts.length;
+        };
+        showTyping();
+        window.setInterval(showTyping, 2000);
+    }
 
     function updateActiveLink() {
         const scrollPos = window.scrollY + 120; // offset for fixed nav
@@ -621,5 +653,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 }
 
-// Initialize effects only after critical resources loaded
-initializePageEffects();
+// NOTE: initializePageEffects() is called via DOMContentLoaded at the top of this file.
