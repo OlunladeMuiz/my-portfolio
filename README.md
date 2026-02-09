@@ -459,7 +459,7 @@ This is a personal portfolio project. For suggestions or improvements:
 
 - **Email**: [muiz.olunlade.9@gmail.com](mailto:muiz.olunlade.9@gmail.com)
 - **GitHub**: [github.com/OlunladeMuiz](https://github.com/OlunladeMuiz)
-- **LinkedIn**: [linkedin.com/in/stephen-onah-1b2832238](https://linkedin.com/in/stephen-onah-1b2832238)
+- **LinkedIn**: [muiz-olunlade-1b12693a6](https://www.linkedin.com/in/muiz-olunlade-1b12693a6?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app)
 - **Instagram**: [@muiz_olunlade](https://www.instagram.com/muiz_olunlade/?hl=en)
 
 ---
